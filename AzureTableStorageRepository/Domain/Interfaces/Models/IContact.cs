@@ -8,5 +8,7 @@ namespace Domain.Interfaces.Models
         string FirstName { get; set; }
         string LastName { get; set; }
         string EmailAddress { get; set; }
+        DateTime DateCreated { get; set; }
+        bool Active { get; set; }
     }
 }

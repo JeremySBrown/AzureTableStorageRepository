@@ -21,12 +21,14 @@ namespace TableStorageRepository.Entities
 
         protected override void SetRowKey()
         {
-            throw new NotImplementedException();
+            RowKey = string.Format("Contact_{0}", Id);
         }
 
         public Guid Id { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public string EmailAddress { get; set; }
+        public DateTime DateCreated { get; set; }
+        public bool Active { get; set; }
     }
 }
