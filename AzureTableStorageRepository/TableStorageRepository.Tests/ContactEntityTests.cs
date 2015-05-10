@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
+using Domain.Interfaces.Models;
 using Domain.Models;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using TableStorageRepository.Entities;
+using TableStorageRepository.Repositories;
 
 namespace TableStorageRepository.Tests
 {
@@ -66,5 +69,73 @@ namespace TableStorageRepository.Tests
             Assert.AreEqual(contactA.Active, contactB.Active);
             
         }
+
+        [TestMethod]
+        public void CRUD_Tests()
+        {
+            var contactA = new Contact
+            {
+                FirstName = "Test",
+                LastName = "User01",
+                EmailAddress = "test.user01@somedomain.com",
+                DateCreated = DateTime.UtcNow,
+                Active = true
+            };
+
+            var contactRepository = new ContactRepository("MyTestTable", "MyTestPartitionKey");
+
+            //Create
+            contactRepository.Create(contactA);
+            Assert.IsTrue(contactA.Id != Guid.Empty);
+
+            // Read
+            var contactB = contactRepository.Find(contactA.Id);
+
+            Assert.AreEqual(contactA.FirstName, contactB.FirstName);
+            Assert.AreEqual(contactA.LastName, contactB.LastName);
+            Assert.AreEqual(contactA.EmailAddress, contactB.EmailAddress);
+            Assert.AreEqual(contactA.DateCreated, contactB.DateCreated);
+            Assert.AreEqual(contactA.Active, contactB.Active);
+
+            // Update
+            contactB.LastName = "Last Name Changed";
+            contactRepository.Update(contactB);
+
+            var contactC = contactRepository.Find(contactB.Id);
+            Assert.IsNotNull(contactC);
+            Assert.AreEqual(contactC.LastName, contactB.LastName);
+
+            // Delete
+            var deleteResult = contactRepository.Delete(contactC.Id);
+            var contactD = contactRepository.Find(contactC.Id);
+
+            Assert.IsTrue(deleteResult);
+            Assert.IsNull(contactD);
+
+        }
+
+        [TestMethod]
+        public void FindAll_ReturnsAllContacts()
+        {
+            var contactRepository = new ContactRepository("MyTestTable", "MyTestPartitionKey");
+            
+
+            for (int i = 0; i < 10; i++)
+            {
+                var contact = new Contact
+                              {
+                                  FirstName = "Test",
+                                  LastName = string.Format("Contact{0}", i),
+                                  DateCreated = DateTime.UtcNow,
+                                  Active = true
+                              };
+                contactRepository.Create(contact);
+            }
+
+            var contacts = contactRepository.FindAll();
+
+            Assert.IsTrue(contacts.Count >= 10);
+        }
+
     }
 }
